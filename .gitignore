@@ -1,0 +1,5 @@
+backend/venv/
+backend/__pycache__/
+backend/enterprise-attack.json
+frontend/node_modules/
+.env

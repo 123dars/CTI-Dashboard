@@ -95,9 +95,10 @@ def status():
         "last_updated": last_updated
     })
 
+# Start background thread (runs whether launched via `python app.py` or gunicorn)
+t = threading.Thread(target=refresh_threats, daemon=True)
+t.start()
+
 if __name__ == "__main__":
-    # Start background thread
-    t = threading.Thread(target=refresh_threats, daemon=True)
-    t.start()
     print("[*] CTI Dashboard API running at http://localhost:5000")
     app.run(debug=True, port=5000)

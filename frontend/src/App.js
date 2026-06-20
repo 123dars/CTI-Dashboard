@@ -53,10 +53,10 @@ function App() {
   const fetchData = useCallback(async () => {
     try {
       const [threatsRes, summaryRes, typeRes, sourceRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/threats'),
-        axios.get('http://localhost:5000/api/summary'),
-        axios.get('http://localhost:5000/api/threats/by-type'),
-        axios.get('http://localhost:5000/api/threats/by-source'),
+        axios.get('https://cti-dashboard1.onrender.com/api/threats'),
+        axios.get('https://cti-dashboard1.onrender.com/api/summary'),
+        axios.get('https://cti-dashboard1.onrender.com/api/threats/by-type'),
+        axios.get('https://cti-dashboard1.onrender.com/api/threats/by-source'),
       ]);
 
       const data = threatsRes.data.data || [];

@@ -7,11 +7,24 @@ from models import db, User, Threat
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import IntegrityError
-import threading
-import time
-import json
-import random
-import os
+import traceback
+from collections import deque
+from datetime import datetime
+
+thread_logs = deque(maxlen=50)
+
+def log_msg(msg):
+    ts = datetime.now().strftime("%H:%M:%S")
+    thread_logs.appendleft(f"[{ts}] {msg}")
+    print(msg)
+
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from osint import get_all_threats, get_sample_threats
+from ml_scorer import analyse_threats, get_summary
+from models import db, User, Threat
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 CORS(app)
@@ -88,13 +101,15 @@ def get_all():
 # --- Background Refresh Thread ---
 def refresh_threats():
     """Background thread to refresh threats every 30 seconds and write to DB."""
+    log_msg("[*] Thread actually started execution inside worker.")
     while True:
         try:
-            print("[*] Fetching latest threats...")
+            log_msg("[*] Fetching latest threats...")
             threats = get_all_threats()
             extra = random.sample(get_sample_threats(), random.randint(1, 4))
             threats = threats + extra
             scored = analyse_threats(threats)
+            log_msg(f"[*] Analyse threats returned {len(scored)} items")
             
             with app.app_context():
                 inserted = 0
@@ -103,12 +118,10 @@ def refresh_threats():
                 for t in scored:
                     ioc_truncated = str(t['ioc'])[:255]
                     
-                    # Prevent duplicates in the SAME pending batch
                     if ioc_truncated in seen_iocs_in_batch:
                         continue
                     seen_iocs_in_batch.add(ioc_truncated)
                     
-                    # Insert if it doesn't exist in the database
                     if not Threat.query.filter_by(indicator=ioc_truncated).first():
                         new_threat = Threat(
                             indicator=ioc_truncated,
@@ -121,12 +134,13 @@ def refresh_threats():
                         inserted += 1
                 try:
                     db.session.commit()
-                    print(f"[*] Fetched and scored threats. Inserted {inserted} new IOCs into DB.")
+                    log_msg(f"[*] Fetched and scored threats. Inserted {inserted} new IOCs into DB.")
                 except Exception as db_err:
                     db.session.rollback()
-                    print(f"[!] DB Error during commit, rolled back: {db_err}")
+                    log_msg(f"[!] DB Error during commit, rolled back: {db_err}")
         except Exception as e:
-            print(f"[!] Error in refresh thread: {e}")
+            log_msg(f"[!] Error in refresh thread: {e}")
+            log_msg(traceback.format_exc())
         time.sleep(30)
 
 # --- API Routes ---
@@ -204,9 +218,13 @@ def start_background_thread():
     global thread_started
     if not thread_started:
         thread_started = True
+        log_msg("[*] Attempting to start background thread in before_request")
         t = threading.Thread(target=refresh_threats, daemon=True)
         t.start()
-        print("[*] Background refresh thread started in worker process")
+
+@app.route("/api/logs")
+def get_logs():
+    return jsonify(list(thread_logs))
 
 if __name__ == "__main__":
     print("[*] CTI Dashboard API running at http://localhost:5000")

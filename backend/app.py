@@ -190,11 +190,17 @@ def status():
 # Run init_db before requests
 init_db()
 
-# Start background thread (only run once if not reloader process)
-if not os.environ.get("WERKZEUG_RUN_MAIN"):
-    t = threading.Thread(target=refresh_threats, daemon=True)
-    t.start()
-    print("[*] Background refresh thread started")
+# Start background thread safely inside a worker process (fixes Gunicorn fork issues)
+thread_started = False
+
+@app.before_request
+def start_background_thread():
+    global thread_started
+    if not thread_started:
+        thread_started = True
+        t = threading.Thread(target=refresh_threats, daemon=True)
+        t.start()
+        print("[*] Background refresh thread started in worker process")
 
 if __name__ == "__main__":
     print("[*] CTI Dashboard API running at http://localhost:5000")

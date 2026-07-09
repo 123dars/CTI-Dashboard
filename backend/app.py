@@ -152,19 +152,25 @@ def refresh_threats():
 @app.route("/api/threats")
 @jwt_required()
 def get_threats():
-    threats = Threat.query.order_by(Threat.timestamp.desc()).limit(100).all()
-    threats_list = [{
-        "indicator": t.indicator,
-        "type": t.type,
-        "source": t.source,
-        "severity": t.severity,
-        "risk_score": t.risk_score,
-        "timestamp": t.timestamp.isoformat()
-    } for t in threats]
+    # Use id.desc() instead of timestamp.desc() to support older SQLite schemas
+    threats = Threat.query.order_by(Threat.id.desc()).limit(100).all()
     
+    # Serialize manually
+    result = []
+    for t in threats:
+        ts = t.timestamp.strftime("%Y-%m-%d %H:%M:%S") if getattr(t, 'timestamp', None) else "Unknown"
+        result.append({
+            "id": t.id,
+            "indicator": t.indicator,
+            "type": t.type,
+            "source": t.source,
+            "severity": t.severity,
+            "risk_score": t.risk_score,
+            "timestamp": ts
+        })
     return jsonify({
         "status": "ok",
-        "data": threats_list
+        "data": result
     })
 
 @app.route("/api/summary")

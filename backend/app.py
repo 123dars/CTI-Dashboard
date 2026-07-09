@@ -95,22 +95,26 @@ def refresh_threats():
             with app.app_context():
                 inserted = 0
                 for t in scored:
+                    # Truncate to 255 chars to prevent PostgreSQL DataError
+                    ioc_truncated = str(t['ioc'])[:255]
+                    
                     # Insert if it doesn't exist
-                    if not Threat.query.filter_by(indicator=t['ioc']).first():
+                    if not Threat.query.filter_by(indicator=ioc_truncated).first():
                         new_threat = Threat(
-                            indicator=t['ioc'],
-                            type=t.get('type', 'unknown'),
-                            source=t.get('source', 'unknown'),
-                            severity=t.get('severity', 'LOW'),
-                            risk_score=t.get('risk_score', 0)
+                            indicator=ioc_truncated,
+                            type=str(t.get('type', 'unknown'))[:50],
+                            source=str(t.get('source', 'unknown'))[:50],
+                            severity=str(t.get('severity', 'LOW'))[:20],
+                            risk_score=float(t.get('risk_score', 0))
                         )
                         db.session.add(new_threat)
                         inserted += 1
                 try:
                     db.session.commit()
                     print(f"[*] Fetched and scored threats. Inserted {inserted} new IOCs into DB.")
-                except IntegrityError:
+                except Exception as db_err:
                     db.session.rollback()
+                    print(f"[!] DB Error during commit, rolled back: {db_err}")
         except Exception as e:
             print(f"[!] Error in refresh thread: {e}")
         time.sleep(30)

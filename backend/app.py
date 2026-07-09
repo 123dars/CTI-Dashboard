@@ -98,11 +98,17 @@ def refresh_threats():
             
             with app.app_context():
                 inserted = 0
+                seen_iocs_in_batch = set()
+                
                 for t in scored:
-                    # Truncate to 255 chars to prevent PostgreSQL DataError
                     ioc_truncated = str(t['ioc'])[:255]
                     
-                    # Insert if it doesn't exist
+                    # Prevent duplicates in the SAME pending batch
+                    if ioc_truncated in seen_iocs_in_batch:
+                        continue
+                    seen_iocs_in_batch.add(ioc_truncated)
+                    
+                    # Insert if it doesn't exist in the database
                     if not Threat.query.filter_by(indicator=ioc_truncated).first():
                         new_threat = Threat(
                             indicator=ioc_truncated,

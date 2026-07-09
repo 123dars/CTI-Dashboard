@@ -14,7 +14,9 @@ function Login({ setToken }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('/api/login', { username, password });
+      // Use the Render backend URL
+      const baseURL = process.env.REACT_APP_API_URL || 'https://cti-dashboard1.onrender.com';
+      const res = await axios.post(`${baseURL}/api/login`, { username, password });
       const token = res.data.access_token;
       setToken(token);
       localStorage.setItem('cti_token', token);

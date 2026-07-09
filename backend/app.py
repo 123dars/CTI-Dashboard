@@ -96,13 +96,13 @@ def refresh_threats():
                 inserted = 0
                 for t in scored:
                     # Insert if it doesn't exist
-                    if not Threat.query.filter_by(indicator=t['indicator']).first():
+                    if not Threat.query.filter_by(indicator=t['ioc']).first():
                         new_threat = Threat(
-                            indicator=t['indicator'],
-                            type=t['type'],
-                            source=t['source'],
-                            severity=t['severity'],
-                            risk_score=t['risk_score']
+                            indicator=t['ioc'],
+                            type=t.get('type', 'unknown'),
+                            source=t.get('source', 'unknown'),
+                            severity=t.get('severity', 'LOW'),
+                            risk_score=t.get('risk_score', 0)
                         )
                         db.session.add(new_threat)
                         inserted += 1

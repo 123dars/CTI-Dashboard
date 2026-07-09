@@ -13,7 +13,7 @@ const COLORS = ['#ef4444', '#f59e0b', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'
 const REFRESH_INTERVAL = 30;
 
 // Axios Interceptor for Auth
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'https://cti-dashboard1.onrender.com';
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('cti_token');

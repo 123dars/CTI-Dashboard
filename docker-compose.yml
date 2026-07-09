@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: cti_db
+    environment:
+      POSTGRES_USER: cti_admin
+      POSTGRES_PASSWORD: cti_password
+      POSTGRES_DB: cti_dashboard
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: cti_backend
+    environment:
+      - DATABASE_URL=postgresql://cti_admin:cti_password@db:5432/cti_dashboard
+      - JWT_SECRET_KEY=super-secret-cti-key
+      - FLASK_ENV=production
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: cti_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -53,27 +53,24 @@ CTI-Dashboard/
     └── package.json
 ```
 
-## 🚀 Running Locally
+## 🚀 Running Locally (Enterprise Architecture)
 
-### Backend
+The platform is fully containerized with a microservices architecture.
+
+### Prerequisites
+- Docker & Docker Compose
+- Ports `80` (Frontend) and `5000` (Backend) must be free.
+
+### Quick Start
+To spin up the PostgreSQL database, Flask API, and React Frontend:
+
 ```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python app.py
+docker-compose up --build
 ```
-Backend runs at `http://localhost:5000`
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm start
-```
-Frontend runs at `http://localhost:3000`
-
-> **Note:** Update the API base URL in `frontend/src/App.js` to `http://localhost:5000` when running locally, or to your deployed backend URL when running against production.
+### Accessing the Dashboard
+- Navigate to `http://localhost`
+- Default Admin Credentials: `admin` / `password123`
 
 ## 📡 API Endpoints
 

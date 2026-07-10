@@ -144,6 +144,11 @@ def refresh_threats():
                     seen_iocs_in_batch.add(ioc_truncated)
                     
                     if not Threat.query.filter_by(indicator=ioc_truncated).first():
+                        # Add random coordinates if they somehow bypassed osint.py
+                        if 'lat' not in t or 'lon' not in t:
+                            t['lat'] = round(random.uniform(-60.0, 70.0), 4)
+                            t['lon'] = round(random.uniform(-180.0, 180.0), 4)
+
                         new_threat = Threat(
                             indicator=ioc_truncated,
                             type=str(t.get('type', 'unknown'))[:50],

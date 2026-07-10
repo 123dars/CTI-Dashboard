@@ -49,32 +49,27 @@ def get_urlhaus_threats():
         return []
 
 def get_sample_threats():
-    """Sample threats for demo when APIs are unavailable"""
+    """Sample threats with randomized data to simulate real-time live updates"""
+    import random
+    
+    # Generate random IP for dynamic updates
+    rand_ip1 = f"{random.randint(11,250)}.{random.randint(1,250)}.{random.randint(1,250)}.{random.randint(1,250)}"
+    rand_ip2 = f"{random.randint(11,250)}.{random.randint(1,250)}.{random.randint(1,250)}.{random.randint(1,250)}"
+    rand_id = random.randint(1000, 99999)
+    
     return [
-        {"ioc": "192.168.1.100:4444", "type": "ip:port", "threat": "botnet_cc",
-         "malware": "Emotet", "confidence": 90, "source": "ThreatFox",
+        {"ioc": f"{rand_ip1}:{random.randint(1024, 65535)}", "type": "ip:port", "threat": "botnet_cc",
+         "malware": "Emotet", "confidence": random.randint(70, 100), "source": "ThreatFox",
          "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
-        {"ioc": "http://malicious-site.ru/payload.exe", "type": "url",
+        {"ioc": f"http://malicious-site-{rand_id}.ru/payload.exe", "type": "url",
          "threat": "malware_download", "malware": ["ransomware"],
-         "confidence": 85, "source": "URLhaus",
+         "confidence": random.randint(60, 95), "source": "URLhaus",
          "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
-        {"ioc": "10.0.0.55:8080", "type": "ip:port", "threat": "ransomware",
-         "malware": "LockBit", "confidence": 95, "source": "ThreatFox",
+        {"ioc": f"{rand_ip2}:{random.randint(1024, 65535)}", "type": "ip:port", "threat": "ransomware",
+         "malware": "LockBit", "confidence": random.randint(80, 100), "source": "ThreatFox",
          "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
-        {"ioc": "http://phishing-bank.xyz/login", "type": "url",
+        {"ioc": f"http://phishing-bank-{rand_id}.xyz/login", "type": "url",
          "threat": "phishing", "malware": ["phishing"],
-         "confidence": 75, "source": "URLhaus",
-         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
-        {"ioc": "evil-domain.com", "type": "domain", "threat": "malware_download",
-         "malware": "TrickBot", "confidence": 88, "source": "ThreatFox",
-         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
-        {"ioc": "5f4dcc3b5aa765d61d8327deb882cf99", "type": "md5_hash",
-         "threat": "malware", "malware": "Ryuk", "confidence": 92,
-         "source": "ThreatFox",
-         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
-        {"ioc": "172.16.0.23:3389", "type": "ip:port", "threat": "exploit",
-         "malware": "BlueKeep", "confidence": 78, "source": "ThreatFox",
-         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
         {"ioc": "http://dropper.site/agent.dll", "type": "url",
          "threat": "malware_download", "malware": ["trojan"],
          "confidence": 82, "source": "URLhaus",

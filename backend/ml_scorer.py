@@ -1,12 +1,19 @@
 # ml_scorer.py — ML-based risk scoring for threat indicators
 
-import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
+try:
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.preprocessing import LabelEncoder
+    import pandas as pd
+    import numpy as np
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
 import json
 
 def calculate_risk_score(threat):
+    if not HAS_SKLEARN:
+        return float(threat.get("confidence", 50) / 100.0)
+        
     """Calculate risk score for a single threat indicator"""
     score = 0
     

@@ -72,7 +72,7 @@ def login():
 
     user = User.query.filter_by(username=username).first()
     if user and bcrypt.check_password_hash(user.password_hash, password):
-        access_token = create_access_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
         return jsonify(access_token=access_token), 200
 
     return jsonify({"msg": "Invalid credentials"}), 401
@@ -198,19 +198,21 @@ def get_critical():
 
 @app.route("/api/threats/by-type")
 @jwt_required()
-def get_by_type():
-    from sqlalchemy import func
-    types_query = db.session.query(Threat.type, func.count(Threat.id)).group_by(Threat.type).all()
-    types = {t[0]: t[1] for t in types_query}
-    return jsonify(types)
+def get_threats_by_type():
+    threats = Threat.query.all()
+    type_counts = {}
+    for t in threats:
+        type_counts[t.type] = type_counts.get(t.type, 0) + 1
+    return jsonify(type_counts)
 
 @app.route("/api/threats/by-source")
 @jwt_required()
-def get_by_source():
-    from sqlalchemy import func
-    sources_query = db.session.query(Threat.source, func.count(Threat.id)).group_by(Threat.source).all()
-    sources = {s[0]: s[1] for s in sources_query}
-    return jsonify(sources)
+def get_threats_by_source():
+    threats = Threat.query.all()
+    source_counts = {}
+    for t in threats:
+        source_counts[t.source] = source_counts.get(t.source, 0) + 1
+    return jsonify(source_counts)
 
 @app.route("/api/status")
 def status():

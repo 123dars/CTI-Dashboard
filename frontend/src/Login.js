@@ -14,7 +14,7 @@ function Login({ setToken }) {
     e.preventDefault();
     setLoading(true);
     try {
-      // Use the Render backend URL
+      // Use the local IPv4 backend
       const baseURL = process.env.REACT_APP_API_URL || 'https://cti-dashboard1.onrender.com';
       const res = await axios.post(`${baseURL}/api/login`, { username, password });
       const token = res.data.access_token;

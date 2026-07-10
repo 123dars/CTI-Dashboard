@@ -13,9 +13,9 @@ const COLORS = ['#ef4444', '#f59e0b', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'
 const REFRESH_INTERVAL = 30;
 
 // --- IMPORTANT ---
-// Replace the URL below with YOUR actual Render backend URL!
-// Example: 'https://cti-backend-xyz.onrender.com'
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'PUT_YOUR_RENDER_BACKEND_URL_HERE';
+// Since you are running the backend locally on your computer,
+// the frontend MUST connect to 127.0.0.1:5000! (localhost resolves to IPv6 on some Windows machines)
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'https://cti-dashboard1.onrender.com';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('cti_token');
@@ -87,10 +87,12 @@ function Dashboard({ setToken }) {
       setLoading(false);
       setCountdown(REFRESH_INTERVAL);
     } catch (err) {
-      if (err.response && err.response.status === 401) {
+      console.error("Error fetching data:", err);
+      // flask-jwt-extended returns 401 for expired tokens, and 422 for malformed/invalid tokens
+      if (err.response && (err.response.status === 401 || err.response.status === 422)) {
         handleLogout();
       }
-      setLoading(false);
+    } finally {setLoading(false);
     }
   }, [navigate]);
 

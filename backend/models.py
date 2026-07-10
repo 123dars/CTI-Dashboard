@@ -17,4 +17,6 @@ class Threat(db.Model):
     source = db.Column(db.String(50), nullable=False) # feodo, urlhaus
     severity = db.Column(db.String(20), nullable=False) # CRITICAL, HIGH, MEDIUM, LOW
     risk_score = db.Column(db.Float, nullable=False)
+    lat = db.Column(db.Float, nullable=True)
+    lon = db.Column(db.Float, nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

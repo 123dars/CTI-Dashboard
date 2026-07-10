@@ -14,7 +14,7 @@ import random
 import threading
 import traceback
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timedelta
 
 thread_logs = deque(maxlen=50)
 
@@ -133,13 +133,33 @@ def refresh_threats():
                             type=str(t.get('type', 'unknown'))[:50],
                             source=str(t.get('source', 'unknown'))[:50],
                             severity=str(t.get('severity', 'LOW'))[:20],
-                            risk_score=float(t.get('risk_score', 0))
+                            risk_score=float(t.get('risk_score', 0)),
+                            lat=t.get('lat'),
+                            lon=t.get('lon')
                         )
                         db.session.add(new_threat)
                         inserted += 1
+                        
+                        # Discord Alert
+                        if new_threat.severity == "CRITICAL":
+                            webhook_url = os.environ.get("DISCORD_WEBHOOK", "YOUR_WEBHOOK_URL_HERE")
+                            if webhook_url != "YOUR_WEBHOOK_URL_HERE":
+                                try:
+                                    import requests
+                                    msg = {"content": f"🚨 **CRITICAL THREAT DETECTED** 🚨\n**IOC:** `{new_threat.indicator}`\n**Malware:** {t.get('malware')}\n**Risk Score:** {new_threat.risk_score}"}
+                                    requests.post(webhook_url, json=msg, timeout=5)
+                                except Exception as e:
+                                    log_msg(f"Discord error: {e}")
                 try:
                     db.session.commit()
                     log_msg(f"[*] Fetched and scored threats. Inserted {inserted} new IOCs into DB.")
+                    
+                    # Data Retention: Cleanup threats older than 30 days
+                    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+                    deleted = Threat.query.filter(Threat.timestamp < thirty_days_ago).delete()
+                    if deleted > 0:
+                        db.session.commit()
+                        log_msg(f"[*] Cleaned up {deleted} old threats.")
                 except Exception as db_err:
                     db.session.rollback()
                     log_msg(f"[!] DB Error during commit, rolled back: {db_err}")
@@ -166,6 +186,8 @@ def get_threats():
             "source": t.source,
             "severity": t.severity,
             "risk_score": t.risk_score,
+            "lat": t.lat,
+            "lon": t.lon,
             "timestamp": ts
         })
     return jsonify({

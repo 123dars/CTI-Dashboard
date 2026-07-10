@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import { Shield, Download, LogOut, ShieldAlert } from 'lucide-react';
 import Login from './Login';
+import ThreatMap from './ThreatMap';
 import './index.css';
 
 const COLORS = ['#ef4444', '#f59e0b', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'];
@@ -214,9 +215,14 @@ function Dashboard({ setToken }) {
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
+        </div>
 
-      {/* Data Table */}
+        {/* Global Threat Map */}
+        <div className="grid grid-cols-1 mb-6">
+          <ThreatMap threats={threats} />
+        </div>
+
+        {/* Data Table */}
       <div className="glass-panel rounded-xl overflow-hidden">
         <div className="p-4 border-b border-gray-700 bg-dark-800/50 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4">

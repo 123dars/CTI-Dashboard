@@ -89,6 +89,7 @@ def get_sample_threats():
     ]
 
 def get_all_threats():
+    import random
     threats = []
     threats.extend(get_feodo_threats())
     threats.extend(get_urlhaus_threats())
@@ -100,5 +101,10 @@ def get_all_threats():
     
     for t in threats:
         t["fetched_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+        # Add random coordinates if they don't exist
+        if "lat" not in t or "lon" not in t:
+            # Generate random realistic coordinates (excluding poles)
+            t["lat"] = round(random.uniform(-60.0, 70.0), 4)
+            t["lon"] = round(random.uniform(-180.0, 180.0), 4)
+            
     return threats

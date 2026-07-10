@@ -5,10 +5,9 @@ import { Globe } from 'lucide-react';
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 export default function ThreatMap({ threats }) {
-  // Extract threats with valid coordinates
-  const markers = threats.filter(t => t.lat != null && t.lon != null).map(t => ({
+  const markers = (threats || []).filter(t => t.lat != null && t.lon != null).map(t => ({
     name: t.indicator,
-    coordinates: [t.lon, t.lat],
+    coordinates: [Number(t.lon), Number(t.lat)],
     severity: t.severity
   }));
 
@@ -31,7 +30,7 @@ export default function ThreatMap({ threats }) {
         <ComposableMap projectionConfig={{ scale: 140 }}>
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
-              geographies.map((geo) => (
+              geographies ? geographies.map((geo) => (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
@@ -44,7 +43,7 @@ export default function ThreatMap({ threats }) {
                     pressed: { outline: 'none' },
                   }}
                 />
-              ))
+              )) : null
             }
           </Geographies>
           {markers.map(({ name, coordinates, severity }, i) => (

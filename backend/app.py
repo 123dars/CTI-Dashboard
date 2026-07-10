@@ -53,8 +53,24 @@ with open("cti_data.json") as f:
 
 # --- Database Initialization ---
 def init_db():
+    from sqlalchemy import text
     with app.app_context():
         db.create_all()
+        
+        # Auto-migrate Render's persistent SQLite DB to add lat/lon
+        try:
+            db.session.execute(text('SELECT lat FROM threats LIMIT 1'))
+        except Exception:
+            db.session.rollback()
+            try:
+                db.session.execute(text('ALTER TABLE threats ADD COLUMN lat FLOAT'))
+                db.session.execute(text('ALTER TABLE threats ADD COLUMN lon FLOAT'))
+                db.session.commit()
+                print("[*] Automatically migrated database to add lat/lon columns.")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[!] Migration failed: {e}")
+
         # Create default admin user if not exists
         if not User.query.filter_by(username='admin').first():
             hashed_pw = bcrypt.generate_password_hash('password123').decode('utf-8')

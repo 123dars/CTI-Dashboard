@@ -70,6 +70,8 @@ def get_sample_threats():
          "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
         {"ioc": f"http://phishing-bank-{rand_id}.xyz/login", "type": "url",
          "threat": "phishing", "malware": ["phishing"],
+         "confidence": random.randint(50, 85), "source": "URLhaus",
+         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
         {"ioc": "http://dropper.site/agent.dll", "type": "url",
          "threat": "malware_download", "malware": ["trojan"],
          "confidence": 82, "source": "URLhaus",

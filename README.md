@@ -12,6 +12,9 @@ A real-time Cyber Threat Intelligence (CTI) dashboard that aggregates live threa
 - **Live threat feed** — pulls real botnet C2 indicators from [Feodo Tracker](https://feodotracker.abuse.ch/) and malicious URLs from [URLhaus](https://urlhaus.abuse.ch/), auto-refreshing every 30 seconds
 - **Risk scoring** — custom ML-based scoring assigns severity levels (CRITICAL / HIGH / MEDIUM / LOW) to each indicator
 - **Interactive visualizations** — threats by type, threats by source, top malware families, and detection trend over time (via Recharts)
+- **Global Threat Map** — dark-themed world map built with `react-simple-maps` that visually plots the live geographic coordinates of incoming threats
+- **Automated Discord Alerting** — backend automatically pushes critical-severity threat alerts directly to a Discord webhook
+- **Data Retention Policy** — continuous background thread automatically purges threats older than 30 days to optimize SQLite database storage
 - **Searchable, filterable, paginated table** of live indicators of compromise (IOCs)
 - **CSV export** of current threat data
 - **MITRE ATT&CK integration** — static reference data for malware, techniques, threat groups, and mitigations sourced from the [MITRE ATT&CK STIX dataset](https://github.com/mitre/cti)
@@ -21,12 +24,14 @@ A real-time Cyber Threat Intelligence (CTI) dashboard that aggregates live threa
 **Frontend**
 - React
 - Recharts (data visualization)
+- React Simple Maps & D3-Geo (geographic threat visualization)
 - Axios (API calls)
 
 **Backend**
 - Flask (Python)
 - Flask-CORS
-- Background threading for periodic threat refresh
+- Background threading for periodic threat refresh & data retention
+- Automated Discord Webhook alerting
 - scikit-learn / pandas / numpy (risk scoring)
 - Gunicorn (production WSGI server)
 
